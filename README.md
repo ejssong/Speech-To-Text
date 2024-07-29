@@ -1,6 +1,7 @@
 # :bulb: Speech-To-Text (STT) ?  
 
-> 음성 오디오를 텍스트로 자동 변환하는 과정 
+> 음성 오디오를 텍스트로 자동 변환하는 과정
+> 
 > `import Speech`  프레임워크를 통해서 구현 할 수 있다. 
 
 ## STT 권한 요청 (Info.plist)
