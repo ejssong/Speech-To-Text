@@ -38,3 +38,36 @@
   <source media="(prefers-color-scheme: light)" srcset="https://github.com/user-attachments/assets/de546d4e-9c4f-4a1a-a215-1a93811f3729">
   <img width = 600 height = 750 alt="sttLogic" src="https://github.com/user-attachments/assets/de546d4e-9c4f-4a1a-a215-1a93811f3729">
 </picture>
+
+## 문제 및 해결
+> 기존 스트리밍 청취 중 STT 사용 시 에러 떨어지면서 앱 크래시
+> 
+>  `com.apple.coreaudio.avfaudio, reason: 'required condition is false: isFormatSampleRateAndChannelCountValid(format)`
+> 
+> 해결 방안 : sample Rate이 0 으로 떨어지면 위 에러와 같이 크래시 나기 때문에 guard 문으로 체크 후 리턴 시켜준다.
+
+```Swift
+let audioEngine = AVAudioEngine()
+let inputNode = audioEngine.inputNode
+let recordingFormat = inputNode.outputFormat(forBus: 0)
+
+guard recordingFormat.sampleRate != 0 else { return }
+```
+
+> SampleRate 이 0으로 STT 실행 안되는 문제
+> 
+> → AVAudioSession.sharedInstance() 의 싱글톤 인스턴스를 가져와서 활성화 시켜준다.
+> 
+> 해결 방안 : 녹음 시작 시 카테고리 변경 해주고, 멈추면 기존에 사용하던 카테고리로 활성화 시켜 준다.
+> 
+> 기존에 AVAudioSession 을 사용하고 있는 경우라면, 모드가 바뀔때 마다 다시 세팅해 줘야한다.
+
+```Swift
+do {
+  try audioSession.setCategory(.playAndRecord, options: [.mixWithOthers, .defaultToSpeaker, .allowBluetooth, .interruptSpokenAudioAndMixWithOthers])
+  try audioSession.setMode(.default)
+  try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+} catch {
+  print("audioSession properties weren't set because of an error.")
+}
+```
